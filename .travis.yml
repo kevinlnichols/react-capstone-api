@@ -1,0 +1,11 @@
+language: node_js
+node_js: node
+services:
+- mongodb
+deploy:
+  provider: heroku
+  api_key:
+    secure: XRKJy+ijLlW8QXmglSygdd4Fz9st+PLvAgt9jhC91HfS0isCppwuWMxu/3o037lSBQTpwhtXe3ja+USQClyzToblYDVXSAHChKDMqRaJ8dVevrcH+Bsz/bcA/SNz1hUfKx9tEBB75o3jullyDAGdnNOXECmN1laQznc2nc3PPI0f3uqsOBwk8ErttY01BIoUrurI8LgX8P+LmlLAxdDEkUMCgT+KJNcneSVb11jzlN2KdJO6xO515iGEZW0dvEt0DcoYSDFVe13HGhFIUYmYPtf/gGRk1bguySLEfr2SXT+Vz+xLSWO4SVPvB14en55SAnIzVClJkbNuTOdzJO0E+2V09mO8ySqd7iic8oOQtIGohkVV0r/CzusGJVqgycreVydYa1E7TU3i3dhmS25VNyaeHSK7BGb8wnLIL5qsK+mrcvR8q+7S3/xOBYAQGHs9bCPZwR7o7nFlHC3bX97y4qtnnAEhf/rnl0iIbD9MCqfWg10k7ntv+gLe89rkiXOwUDUF17acvSWMViHxK7bVI21mE7cw8Ey8zdtq6I2C+rC9EZalfNqnL7KJVlwLM8GG2nr5suQ77cvJn18u9jVjVLyYJHwH9tB36UCKjRi/gahM1CoBtqnNrI08pGGw1oDlxgg6T2yRQC9JjUxBDbVeCnxvAv9GQZpuYET66lSFu40=
+  app: intense-journey-94565
+  on:
+    repo: kevinlnichols/react-capstone-api
