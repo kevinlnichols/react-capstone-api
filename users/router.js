@@ -1,7 +1,9 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-
+const mongoose = require('mongoose');
 const { User } = require('./models');
+const passport = require('passport');
+const jwtAuth = passport.authenticate('jwt', { session: false });
 
 const router = express.Router();
 
@@ -138,8 +140,33 @@ router.post('/', jsonParser, (req, res) => {
 // verify this in the Mongo shell.
 router.get('/', (req, res) => {
     return User.find()
-        .then(users => res.json(users.map(user => user.serialize())))
-        .catch(err => res.status(500).json({ message: 'Internal server error' }));
+        .then(users => res.json(users.map(user => user.apiRepr())))
+        .catch(err => { 
+            res.status(500).json({ message: 'Internal server error', err })
+            console.log(err);
+        });
+});
+
+router.put('/:id', jsonParser, jwtAuth, (req, res) => {
+    User.findByIdAndUpdate(req.user._id, {
+        $addToSet: {friends: req.params.id}
+    }).then(friend => {
+        return res.status(204).end();
+    }).catch(err => {
+        return res.status(500).json({
+            message: 'Internal Server Error'
+        });
+    });  
+})
+
+router.get('/myUser', jwtAuth, (req, res) => {
+    return User.find({_id: req.user._id, })
+        .populate('friends', '_id fullName')
+        .then(users => res.json(users.map(user => user.apiRepr())))
+        .catch(err => { 
+            res.status(500).json({ message: 'Internal server error', err })
+            console.log(err);
+        });
 });
 
 module.exports = { router };

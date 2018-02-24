@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const app = express();
 const cors = require('cors');
-const {CLIENT_ORIGIN} = require('./config');
+//const {CLIENT_ORIGIN} = require('./config');
 const mongoose = require('mongoose');
 const morgan = require('morgan');
 const passport = require('passport');
@@ -55,11 +55,11 @@ app.use('*', (req, res) => {
 
 
 //redundant cors?
-app.use(
-  cors({
-      origin: CLIENT_ORIGIN
-  })
-);
+// app.use(
+//   cors({
+//       origin: CLIENT_ORIGIN
+//   })
+// );
 
 // Referenced by both runServer and closeServer. closeServer
 // assumes runServer has run and set `server` to a server object

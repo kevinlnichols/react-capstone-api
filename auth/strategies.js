@@ -1,5 +1,5 @@
 'use strict';
-const { Strategy: LocalStrategy } = require('passport-local');
+const { Strategy: LocalStrategy } = require('passport-local').Strategy;
 
 const { Strategy: JwtStrategy, ExtractJwt } = require('passport-jwt');
 

@@ -44,7 +44,8 @@ const UserSchema = mongoose.Schema({
     },
     ratings: [RatingSchema],
     group: [GroupSchema],
-    friends: { type: Array, default: [] },
+    friends: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: [true, 'No lead id found'] }],
+   // friends: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', unique: true, required: [true, 'No lead id found'] }],
 });
 
 UserSchema.virtual('fullName').get(function () {
@@ -56,19 +57,20 @@ UserSchema.methods.apiRepr = function () {
         _id: this._id,
         fullName: this.fullName || '',
         username: this.username || '',
+        friends: this.friends || '',
     };
 };
 
-UserSchema.methods.validatePassword = function(password) {
+UserSchema.methods.validatePassword = function (password) {
     return bcrypt.compare(password, this.password);
 };
 
-UserSchema.statics.hashPassword = function(password) {
+UserSchema.statics.hashPassword = function (password) {
     return bcrypt.hash(password, 10);
 };
 
-const User = mongoose.model('user', UserSchema);
-const Rating = mongoose.model('rating', RatingSchema);
-const Group = mongoose.model('group', GroupSchema);
+const User = mongoose.model('User', UserSchema);
+const Rating = mongoose.model('Rating', RatingSchema);
+const Group = mongoose.model('Group', GroupSchema);
 
-module.exports = {User, Rating, Group}
+module.exports = { User, Rating, Group }
