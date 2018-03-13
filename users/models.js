@@ -20,7 +20,7 @@ RatingSchema.methods.apiRepr = function () {
 
 const GroupSchema = mongoose.Schema({
     groupName: { type: String, default: '' },
-    members: { type: Array, default: [] }
+    members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: [true, 'No lead id found'] }]
 });
 
 GroupSchema.methods.apiRepr = function () {
@@ -43,7 +43,7 @@ const UserSchema = mongoose.Schema({
         required: true
     },
     ratings: [RatingSchema],
-    group: [GroupSchema],
+    groups: [GroupSchema],
     friends: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: [true, 'No lead id found'] }],
    // friends: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', unique: true, required: [true, 'No lead id found'] }],
 });
@@ -58,6 +58,7 @@ UserSchema.methods.apiRepr = function () {
         fullName: this.fullName || '',
         username: this.username || '',
         friends: this.friends || '',
+        groups: this.groups || ''
     };
 };
 
@@ -67,6 +68,16 @@ UserSchema.methods.validatePassword = function (password) {
 
 UserSchema.statics.hashPassword = function (password) {
     return bcrypt.hash(password, 10);
+};
+
+const InviteSchema = mongoose.Schema({
+    invited:  [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: [true, 'No lead id found'] }]
+});
+
+InviteSchema.methods.apiRepr = function () {
+    return {
+        invited: this.invited || ''
+    };
 };
 
 const User = mongoose.model('User', UserSchema);

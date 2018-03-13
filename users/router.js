@@ -130,7 +130,7 @@ router.post('/', jsonParser, (req, res) => {
             if (err.reason === 'ValidationError') {
                 return res.status(err.code).json(err);
             }
-            res.status(500).json({ code: 500, message: 'Internal server error' });
+            res.status(500).json({ code: 500, message: 'Internal server error4' });
         });
 });
 
@@ -142,30 +142,58 @@ router.get('/', (req, res) => {
     return User.find()
         .then(users => res.json(users.map(user => user.apiRepr())))
         .catch(err => { 
-            res.status(500).json({ message: 'Internal server error', err })
+            res.status(500).json({ message: 'Internal server error3', err })
             console.log(err);
         });
 });
 
+router.put('/group/create', jsonParser, jwtAuth, (req, res) => {
+    console.log('hi', req.body.id);
+    User.findByIdAndUpdate(req.user._id, {
+        $addToSet: {groups: req.body}
+    }).then(member => {
+        return res.status(204).end();
+    }).catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            message: 'Internal Server Erroor'
+        });
+    });  
+})
+
 router.put('/:id', jsonParser, jwtAuth, (req, res) => {
+    console.log('the /:id', req.params.id);
     User.findByIdAndUpdate(req.user._id, {
         $addToSet: {friends: req.params.id}
     }).then(friend => {
         return res.status(204).end();
     }).catch(err => {
+        console.log(err);
         return res.status(500).json({
-            message: 'Internal Server Error'
+            message: 'Internal Server Error1'
         });
     });  
 })
 
-router.get('/myUser', jwtAuth, (req, res) => {
-    return User.find({_id: req.user._id, })
-        .populate('friends', '_id fullName')
+router.get('/myusers', jwtAuth, (req, res) => {
+    console.log('hello');
+    return User.findOne({_id: req.user._id, })
+        .populate('friends', '_id firstName lastName')
+        .then(user => res.json(user.friends))
+        .catch(err => { 
+            res.status(500).json({ message: 'Internal server error2', err })
+            console.log(err);
+        });
+});
+
+router.get('/groups/view', (req, res) => {
+    console.log("Its reaching");
+    return User.find()
         .then(users => res.json(users.map(user => user.apiRepr())))
         .catch(err => { 
-            res.status(500).json({ message: 'Internal server error', err })
+            res.status(500).json({ message: 'Internal server error3', err })
             console.log(err);
+
         });
 });
 
