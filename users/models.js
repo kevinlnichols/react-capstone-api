@@ -5,9 +5,10 @@ const mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
 
 const RatingSchema = mongoose.Schema({
-    restaurant: { type: String, default: '' },
     rating: { type: Number, default: '' },
-    category: { type: String, default: '' }
+    categories: [{ type: String, default: '' }],
+    groupId: {type: mongoose.Schema.Types.ObjectId, ref: 'Group'},
+    memberId: {type: mongoose.Schema.Types.ObjectId, ref: 'User'}
 });
 
 RatingSchema.methods.apiRepr = function () {
@@ -20,7 +21,10 @@ RatingSchema.methods.apiRepr = function () {
 
 const GroupSchema = mongoose.Schema({
     groupName: { type: String, default: '' },
-    members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: [true, 'No lead id found'] }]
+    members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: [true, 'No lead id found'] }],
+  
+    votes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Rating', required: [true, 'No lead id found'] }],
+       
 });
 
 GroupSchema.methods.apiRepr = function () {
@@ -79,6 +83,8 @@ InviteSchema.methods.apiRepr = function () {
         invited: this.invited || ''
     };
 };
+
+
 
 const User = mongoose.model('User', UserSchema);
 const Rating = mongoose.model('Rating', RatingSchema);

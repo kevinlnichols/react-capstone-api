@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const { User } = require('./models');
+const { User, Rating } = require('./models');
 const passport = require('passport');
 const jwtAuth = passport.authenticate('jwt', { session: false });
 
@@ -141,59 +141,157 @@ router.post('/', jsonParser, (req, res) => {
 router.get('/', (req, res) => {
     return User.find()
         .then(users => res.json(users.map(user => user.apiRepr())))
-        .catch(err => { 
+        .catch(err => {
             res.status(500).json({ message: 'Internal server error3', err })
-            console.log(err);
         });
 });
 
 router.put('/group/create', jsonParser, jwtAuth, (req, res) => {
-    console.log('hi', req.body.id);
     User.findByIdAndUpdate(req.user._id, {
-        $addToSet: {groups: req.body}
+        $addToSet: { groups: req.body }
     }).then(member => {
         return res.status(204).end();
     }).catch(err => {
-        console.log(err);
         return res.status(500).json({
             message: 'Internal Server Erroor'
         });
-    });  
+    });
 })
 
 router.put('/:id', jsonParser, jwtAuth, (req, res) => {
-    console.log('the /:id', req.params.id);
     User.findByIdAndUpdate(req.user._id, {
-        $addToSet: {friends: req.params.id}
+        $addToSet: { friends: req.params.id }
     }).then(friend => {
         return res.status(204).end();
     }).catch(err => {
-        console.log(err);
         return res.status(500).json({
             message: 'Internal Server Error1'
         });
-    });  
+    });
 })
 
 router.get('/myusers', jwtAuth, (req, res) => {
-    console.log('hello');
-    return User.findOne({_id: req.user._id, })
+    return User.findOne({ _id: req.user._id, })
         .populate('friends', '_id firstName lastName')
         .then(user => res.json(user.friends))
-        .catch(err => { 
+        .catch(err => {
             res.status(500).json({ message: 'Internal server error2', err })
-            console.log(err);
         });
 });
 
 router.get('/groups/view', (req, res) => {
-    console.log("Its reaching");
     return User.find()
         .then(users => res.json(users.map(user => user.apiRepr())))
-        .catch(err => { 
+        .catch(err => {
             res.status(500).json({ message: 'Internal server error3', err })
-            console.log(err);
+        });
+});
 
+router.get('/group', jwtAuth, (req, res) => {
+    const find = { $or: [{ _id: req.user._id }, { 'groups.members': req.user._id }] };
+    return User.find(find)
+        .populate('groups.members')
+        .populate('groups.votes')
+        .then(users => {
+            let groups = [];
+            users.forEach(user => {
+                if (user._id == req.user._id) {
+                    if (user.groups) {
+                        groups = groups.concat(user.groups);
+                    }
+                } else {
+                    const groupsFound = user.groups.find(g => {
+                        return g.members.find(member => member._id == req.user._id)
+                    })
+                    if (groupsFound) {
+                        groups = groups.concat(groupsFound);
+                    }
+                }
+            })
+            res.json(groups)
+        })
+        .catch(err => {
+            res.status(500).json({ message: 'Internal server error', err })
+        });
+});
+
+router.get('/rating', jwtAuth, (req, res) => {
+    return Rating.find({ 'groupId': req.params.id})
+        .populate('ratings._id')
+        .populate('ratings.memberid')
+        .populate('ratings.categories')
+        .then(users => {
+            console.log('acutally ratings', users);
+            let groups = [];
+            users.forEach(user => {
+                if (user._id == req.user._id) {
+                    if (user.groups) {
+                        groups = groups.concat(user.groups);
+                    }
+                } else {
+                    const groupsFound = user.groups.find(g => {
+                        return g.members.find(member => member._id == req.user._id)
+                    })
+                    if (groupsFound) {
+                        groups = groups.concat(groupsFound);
+                    }
+                }
+            })
+            res.json(groups)
+        })
+        .catch(err => {
+            res.status(500).json({ message: 'Internal server error', err })
+        });
+});
+
+router.delete('/group/:id', jwtAuth, (req, res) => {
+    return User.findOneAndUpdate(
+        { 'groups._id': req.params.id }, 
+        { $pull: { groups: { _id: req.params.id } } })
+        .then(count => {
+            res.status(204).end();
+        })
+        .catch(err => {
+            res.status(500).json({ message: 'Internal server error haha', err })
+            console.log(err);
+        });;
+});
+
+router.delete('/friends/:id', jwtAuth, (req, res) => {
+    return User.findOneAndUpdate({ '_id': req.user._id }, { $pull: { friends: req.params.id  } })
+        .then(count => {
+            res.status(204).end();
+        })
+        .catch(err => {
+            res.status(500).json({ message: 'Internal server error haha', err })
+            console.log(err);
+        });;
+});
+
+router.post('/vote/:id', jwtAuth, jsonParser, (req, res) => {
+    let ratingObject;
+    return Rating.findOneAndUpdate({ 'groupId': req.params.id, 'memberId': req.user._id },
+        {
+            $set: {
+                groupId: req.params.id,
+                memberId: req.user._id,
+                categories: req.body
+            }
+        }, {
+            upsert: true,
+            new: true
+        })
+        .then(rating => {
+            ratingObject = rating;
+            return User.findOneAndUpdate({'groups._id': req.params.id}, {$addToSet: {'groups.$.votes': ratingObject._id}})
+        })
+        .then(rating => res.json(ratingObject.categories))
+        .catch(err => {
+            console.log(err);
+            if (err.reason === 'ValidationError') {
+                return res.status(err.code).json(err);
+            }
+            res.status(500).json({ code: 500, message: 'Internal server error heyo' });
         });
 });
 
