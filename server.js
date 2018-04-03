@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const app = express();
 const cors = require('cors');
-const {CLIENT_ORIGIN} = require('./config');
+//const {CLIENT_ORIGIN} = require('./config');
 const mongoose = require('mongoose');
 const morgan = require('morgan');
 const passport = require('passport');
@@ -17,16 +17,16 @@ mongoose.Promise = global.Promise;
 //logging
 app.use(morgan('common'));
 
-//cors
-// app.use(function (req, res, next) {
-//   res.header('Access-Control-Allow-Origin', '*');
-//   res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
-//   res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE');
-//   if (req.method === 'OPTIONS') {
-//     return res.send(204);
-//   }
-//   next();
-// });
+cors
+app.use(function (req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE');
+  if (req.method === 'OPTIONS') {
+    return res.send(204);
+  }
+  next();
+});
 
 passport.use(localStrategy);
 passport.use(jwtStrategy);
@@ -55,11 +55,11 @@ app.use('*', (req, res) => {
 
 
 //redundant cors?
-app.use(
-  cors({
-      origin: CLIENT_ORIGIN
-  })
-);
+// app.use(
+//   cors({
+//       origin: CLIENT_ORIGIN
+//   })
+// );
 
 // Referenced by both runServer and closeServer. closeServer
 // assumes runServer has run and set `server` to a server object
