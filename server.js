@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const app = express();
 const cors = require('cors');
-//const {CLIENT_ORIGIN} = require('./config');
+const {CLIENT_ORIGIN} = require('./config');
 const mongoose = require('mongoose');
 const morgan = require('morgan');
 const passport = require('passport');
