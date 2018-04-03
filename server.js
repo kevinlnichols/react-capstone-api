@@ -18,15 +18,15 @@ mongoose.Promise = global.Promise;
 app.use(morgan('common'));
 
 //cors
-app.use(function (req, res, next) {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
-  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE');
-  if (req.method === 'OPTIONS') {
-    return res.send(204);
-  }
-  next();
-});
+// app.use(function (req, res, next) {
+//   res.header('Access-Control-Allow-Origin', '*');
+//   res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+//   res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE');
+//   if (req.method === 'OPTIONS') {
+//     return res.send(204);
+//   }
+//   next();
+// });
 
 passport.use(localStrategy);
 passport.use(jwtStrategy);
@@ -34,9 +34,9 @@ passport.use(jwtStrategy);
 app.use('/api/users', usersRouter);
 app.use('/api/auth', authRouter);
 
-// app.get('/api/*', (req, res) => {
-//   res.json({ok: true});
-// });
+app.get('/api/*', (req, res) => {
+  res.json({ok: true});
+});
 
 const jwtAuth = passport.authenticate('jwt', { session: false });
 
@@ -55,11 +55,11 @@ app.use('*', (req, res) => {
 
 
 //redundant cors?
-// app.use(
-//   cors({
-//       origin: CLIENT_ORIGIN
-//   })
-// );
+app.use(
+  cors({
+      origin: CLIENT_ORIGIN
+  })
+);
 
 // Referenced by both runServer and closeServer. closeServer
 // assumes runServer has run and set `server` to a server object
